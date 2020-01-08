@@ -2,6 +2,7 @@
 
 Fun thing to watch gpu usage on cluster. Flask-based webapp to show GPU occupation and usage statistics collected via SSH and nvidia-smi.
 
+![Screenshot](example.png)
 
 ## Usage
 First, adapt `config.py`.
