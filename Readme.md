@@ -1,6 +1,6 @@
 # GPU Monitor
 
-Fun thing to watch gpu usage on cluster.
+Fun thing to watch gpu usage on cluster. Flask-based webapp to show GPU occupation and usage statistics collected via SSH and nvidia-smi.
 
 
 ## Usage
@@ -22,7 +22,9 @@ export GPUMONITOR_PASS='<private_key_passphrase>'
 python -u server.py
 ```
 
-## Notes
+And navigate to your hosted web-app :)
+
+## Notes
 We currently assume single processes per GPU for display purposes.
 
 ## Requirements
