@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>GPU Usage</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="static/assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="static/assets/css/noscript.css" /></noscript>
+    
+    <link rel="stylesheet" href="static/assets/css/custom.css" />
+    <link rel="stylesheet" href="static/assets/css/tablesorter/theme.default.css">
+</head>
+
+<body class="is-preload">
+
+<div id="wrapper">
+    <header id="header">
+        <h1>GPU Monitor</h1>
+        <p>Some random page to check which GPUs are free...</p>
+      </header>
+    <nav id="nav">
+        <ul>
+          <li><a href="#free" class="active">Free</a></li>
+          <li><a href="#all">All</a></li>
+          <li><a href="#statistics">Statistics</a></li>
+        </ul>
+      </nav>
+  <div id="main">
+      <section id="free" class="main special">
+          <header class="major">
+              <h2>Free GPUs</h2>
+            </header>
+        <div id="free_usage"></div>
+      </section>
+    <section id="all" class="main special">
+        <header class="major">
+            <h2>All GPUs</h2>
+          </header>
+    <div id="all_usage"></div>
+    </section>
+    <section id="statistics" class="main special">
+        <header class="major">
+            <h2>Statistics</h2>
+          </header>
+          <p>Collecting statistics since {{ stats_time }}</p>
+    <div id="stats"></div>
+    <p>We are using a conversion factor of 0.30675kgCO2e/kWh 
+      (<a href='https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/726911/2018_methodology_paper_FINAL_v01-00.pdf'>source</a>) 
+      to convert energy to CO2 emissions. Further, we are assuming that a tree can offset about 10 kg CO2 per year (<a href='https://www.greenenergyconsulting.co.uk/treeplanting.php'>source</a>).
+    </p>
+    </section>
+  </div>
+</div>
+
+<script src="static/assets/js/jquery.min.js"></script>
+<script src="static/assets/js/jquery.scrollex.min.js"></script>
+<script src="static/assets/js/jquery.scrolly.min.js"></script>
+<script src="static/assets/js/browser.min.js"></script>
+<script src="static/assets/js/breakpoints.min.js"></script>
+<script src="static/assets/js/util.js"></script>
+<script src="static/assets/js/main.js"></script>
+<script src="static/assets/js/jquery.tablesorter.min.js"></script>
+<script src="static/assets/js/jquery.tablesorter.widgets.min.js"></script>
+<script>
+    (function update() {
+        $.ajax({
+          url: "/gpu_usage",
+          type: "get",
+          data: {'show_all': 1},
+          success: function(response) {
+            $("#all_usage").html(response);
+          },
+          error: function(xhr) {
+            //Do Something to handle error
+          }                        // pass existing options
+        }).then(function() {           // on completion, restart
+            setTimeout(update, 30000);  // function refers to itself
+        });
+    })();                              // automatically invoke for first run
+</script>
+<script>
+  (function update() {
+        $.ajax({
+          url: "/gpu_usage",
+          type: "get",
+          data: {'show_all': 0},
+          success: function(response) {
+            $("#free_usage").html(response);
+          },
+          error: function(xhr) {
+            //Do Something to handle error
+          }                        // pass existing options
+        }).then(function() {           // on completion, restart
+            setTimeout(update, 30000);  // function refers to itself
+        });
+    })();
+</script>
+<script>
+    (function update() {
+          $.ajax({
+            url: "/statistics",
+            type: "get",
+            success: function(response) {
+              $("#stats").html(response);
+            },
+            error: function(xhr) {
+              //Do Something to handle error
+            }                        // pass existing options
+          }).then(function(){
+            $("#stats_table").tablesorter({sortList: [[1, 1]]});
+          }).then(function() {           // on completion, restart
+              setTimeout(update, 30000);  // function refers to itself
+          })
+      })();
+  </script>
+  <script>
+    $(function() {
+  
+});
+  </script>
+
+</body>
+
+</html>

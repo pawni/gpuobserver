@@ -1,0 +1,33 @@
+{% for server, info in infos.items() %}
+    <h2>{{ server }}</h2>
+    <div>
+        <div class='divTable'>
+            <div class='divTableRow'>
+                <div class='divTableCell'>Id</div>
+                <div class='divTableCell'>Free?</div>
+                <div class='divTableCell'>Model</div>
+                <div class='divTableCell'>Memory</div>
+                {% if show_all %}
+                <div class='divTableCell'>Util</div>
+                <div class='divTableCell'>Used Mem</div>
+                <div class='divTableCell'>User</div>
+                {% endif %}
+            </div>
+            {% for gpu in info %}
+            {% if gpu.free or show_all %}
+            <div class='divTableRow'>
+                <div class='divTableCell'>{{ gpu.idx }}</div>
+                <div class='divTableCell'>{% if gpu.free %}<span style='color: green;'>&#10003;</span>{% else %}<span style='color: red;'>&#10007;</span>{% endif %}</div>
+                <div class='divTableCell'>{{ gpu.model }}</div>
+                <div class='divTableCell'>{{ gpu.mem }}</div>
+                {% if show_all %}
+                <div class='divTableCell'>{{ gpu.gpu_util }}</div>
+                <div class='divTableCell'>{{ gpu.used_mem }}</div>
+                <div class='divTableCell'><ul>{% for user in gpu.real_users %}<li>{{ user }}</li>{% endfor %}</ul></div>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
