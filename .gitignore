@@ -1,5 +1,8 @@
+# coding related things
 .vscode/
 .DS_Store
+# custom configs
+config_*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

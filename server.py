@@ -30,7 +30,17 @@ def statistics():
 
     return df.to_html(index=False, table_id='stats_table', classes='tablesorter', columns=columns)
 
-
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--port', type=int, default=5000, help="port to run server on")
+    parser.add_argument('--host', default='0.0.0.0', help="which host to listen on")
+    parser.add_argument('--config', help="json config file")
+    
+    args = parser.parse_args()
+    if args.config is not None:
+        config.update_config(args.config)
+
     gpu_helper.setup()
-    app.run(debug=True, host= '0.0.0.0') 
+    app.run(debug=True, host=args.host, port=args.port) 
