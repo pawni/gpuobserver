@@ -4,8 +4,10 @@ Fun thing to watch gpu usage on cluster. Flask-based webapp to show GPU occupati
 
 ![Screenshot](example.png)
 
+The server regularly parses `nvidia-smi` to check GPU usage and present free and used GPUs. It logs usage to some cache and shows usage statistics per user and their respective power usage and CO2 footprint.
+
 ## Usage
-First, adapt `config.py`.
+First, adapt `config.py` or write a custom `config.json` and pass it via `--config config.json`.
 
 Run either with your username and password:
 ```
