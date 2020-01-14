@@ -6,12 +6,12 @@ from datetime import datetime, timedelta
 import threading
 import pickle
 import os
+import traceback
 
 logger = logging.getLogger()
 
 # init cache
 cache = {
-    'servers': {server: {'time': datetime.fromtimestamp(0.)} for server in config.servers},
     'users': {},
     'since': datetime.now()
 }
@@ -131,8 +131,8 @@ def update_cache(interval):
             cache['servers'][server]['info'] = get_gpu_infos(config.ssh)
             cache['servers'][server]['time'] = datetime.now()
             config.ssh.close()
-        except Exception as e:
-            logging.error(f'Had an issue while updating cache: {e}')
+        except Exception:
+            logging.error(f'Had an issue while updating cache for {server}: {traceback.format_exc()}')
     with open(config.cache_file, 'wb') as f:
         pickle.dump(cache, f)
     threading.Timer(interval.total_seconds(), update_cache, (interval, )).start()
@@ -144,6 +144,7 @@ def start_async(interval):
 
 
 def setup():
+    cache['servers'] = {server: {'time': datetime.fromtimestamp(0.), 'info': []} for server in config.servers}
     # start async updates of cache
     if os.path.isfile(config.cache_file):
         with open(config.cache_file, 'rb') as f:
