@@ -76,7 +76,7 @@ def get_gpu_infos(ssh):
         model = gpu.find('product_name').text
         power_draw = gpu.find('power_readings').find('power_draw').text
         processes = gpu.findall('processes')[0]
-        pids = [process.find('pid').text for process in processes]
+        pids = [process.find('pid').text for process in processes if config.process_filter.search(process.find('process_name').text)]
         mem = gpu.find('fb_memory_usage').find('total').text
         gpu_util = gpu.find('utilization').find('gpu_util').text
         used_mem = gpu.find('fb_memory_usage').find('used').text

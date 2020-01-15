@@ -25,6 +25,8 @@ export GPUMONITOR_PASS='<private_key_passphrase>'
 python -u server.py
 ```
 
+The `process_filter` let's you add a regex to filter for only specific processes, e.g. `python.*` could be an easy way to only look for python jobs and ignore window managers etc.
+
 And navigate to your hosted web-app :)
 
 ## Notes

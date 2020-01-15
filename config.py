@@ -1,6 +1,7 @@
 import paramiko
 import os
 from datetime import datetime, timedelta
+import re
 
 ssh = paramiko.SSHClient()
 
@@ -25,8 +26,11 @@ servers = [
     'gpuserver2',
 ]
 
+# process filter
+process_filter = re.compile(r'.*')
+
 def update_config(file_path):
-    global cache_file, servers, update_interval
+    global cache_file, process_filter, servers, update_interval
     import json
     with open(file_path, 'r') as f:
         new_config = json.load(f)
@@ -39,3 +43,6 @@ def update_config(file_path):
     
     if 'update_interval' in new_config.keys():
         update_interval = timedelta(seconds=new_config['update_interval'])
+
+    if 'process_filter' in new_config.keys():
+        process_filter = re.compile(new_config['process_filter'])
