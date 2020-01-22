@@ -128,9 +128,11 @@ def update_cache(interval):
         try:
             logging.info(f'loading server {server}')
             config.ssh.connect(server, username=config.user, password=config.key)
-            cache['servers'][server]['info'] = get_gpu_infos(config.ssh)
-            cache['servers'][server]['time'] = datetime.now()
-            config.ssh.close()
+            try:
+                cache['servers'][server]['info'] = get_gpu_infos(config.ssh)
+                cache['servers'][server]['time'] = datetime.now()
+            finally:
+                config.ssh.close()
         except Exception:
             logging.error(f'Had an issue while updating cache for {server}: {traceback.format_exc()}')
     with open(config.cache_file, 'wb') as f:
