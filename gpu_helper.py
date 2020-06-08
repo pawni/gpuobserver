@@ -127,7 +127,7 @@ def update_cache(interval):
     for server in config.servers:
         try:
             logging.info(f'loading server {server}')
-            config.ssh.connect(server, username=config.user, password=config.key)
+            config.ssh.connect(server, username=config.user, password=config.password, key_filename=config.key)
             try:
                 cache['servers'][server]['info'] = get_gpu_infos(config.ssh)
                 cache['servers'][server]['time'] = datetime.now()

@@ -2,6 +2,7 @@ import paramiko
 import os
 from datetime import datetime, timedelta
 import re
+import getpass
 
 ssh = paramiko.SSHClient()
 
@@ -9,8 +10,9 @@ ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 # read ssh credentials from environment
-key = os.environ.get('GPUMONITOR_PASS', None)
-user = os.environ.get('GPUMONITOR_USER', None)
+key = os.environ.get('GPUMONITOR_KEY', None)
+password = os.environ.get('GPUMONITOR_PASS', None)
+user = os.environ.get('GPUMONITOR_USER', getpass.getuser())
 if user is None:
     raise ValueError('username for SSH is not set')
 

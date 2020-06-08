@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request
 import requests
+import logging
+import time
+
 import config
 import gpu_helper
 from statistics import get_stats_df, get_time_str
-import logging
-import time
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,6 +30,7 @@ def statistics():
     columns=['Name', 'GPU Time', 'Used Power [Wh]', 'Generated CO2 [kg]', 'Trees * year to offset', 'Avg. Util [%]']
 
     return df.to_html(index=False, table_id='stats_table', classes='tablesorter', columns=columns)
+
 
 if __name__ == '__main__':
     import argparse
