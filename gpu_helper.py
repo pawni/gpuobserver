@@ -8,6 +8,10 @@ import pickle
 import os
 import traceback
 
+from multiprocessing.dummy import Pool as ThreadPool
+import paramiko
+import socket
+
 logger = logging.getLogger()
 
 # init cache
@@ -21,16 +25,19 @@ user_template = {'name': '', 'inc': 0, 'time': timedelta(seconds=0.), 'cum_energ
 
 def get_nvidiasmi(ssh):
     # function to get nvidia smi xmls
-    _, ssh_stdout, _ = config.ssh.exec_command('nvidia-smi -q -x')
+    _, ssh_stdout, _ = ssh.exec_command('nvidia-smi -q -x')
 
-    res = ''.join(ssh_stdout.readlines())
-    return ET.fromstring(res)
+    try:
+        ret = ET.fromstring(''.join(ssh_stdout.readlines()))
+        return ret
+    except ET.ParseError:
+        return False
 
 
 def get_ps(ssh, pids):
     # function to identify processes running
     pid_cmd = 'ps -o pid= -o ruser= -p {}'.format(','.join(pids))
-    _, ssh_stdout, _ = config.ssh.exec_command(pid_cmd)
+    _, ssh_stdout, _ = ssh.exec_command(pid_cmd)
 
     res = ''.join(ssh_stdout.readlines())
 
@@ -69,6 +76,8 @@ def update_users(info):
 def get_gpu_infos(ssh):
     # collects gpu usage information for a ssh connection  
     nvidiasmi_output = get_nvidiasmi(ssh)
+    if not nvidiasmi_output:
+        return False
     gpus = nvidiasmi_output.findall('gpu')
 
     gpu_infos = []
@@ -118,31 +127,59 @@ def get_remote_info(server):
     tstring = cache['servers'][server]['time'].strftime('%d.%m.%Y %H:%M:%S')
     logger.info(f'Using cache for {server} from {tstring}')
 
-    return cache['servers'][server]['info']
+    return cache['servers'][server]
 
+def get_new_server_info(server):
+    server_info = {}
+    
+    try:
+        ssh = paramiko.SSHClient()
 
-def update_cache(interval):
+        # be careful to change this if you don't trust to add the hostkeys automatically
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        logging.info(f'loading server {server}')
+        ssh.connect(server, username=config.user, password=config.password, key_filename=config.key)
+        try:
+            gpu_infos = get_gpu_infos(ssh)
+            if not gpu_infos:
+                server_info['smi_error'] = True
+            else:
+                server_info['info'] = gpu_infos
+                server_info['smi_error'] = False
+            server_info['time'] = datetime.now()
+            logging.info(f'finished loading server {server}')
+        finally:
+            ssh.close()
+            del ssh
+    except Exception:
+        logging.error(f'Had an issue while updating cache for {server}: {traceback.format_exc()}')
+
+    return server, server_info
+
+def update_cache(server, interval):
     #  asyncronously updates cache if interval is passed
     logging.info('updating cache')
-    for server in config.servers:
-        try:
-            logging.info(f'loading server {server}')
-            config.ssh.connect(server, username=config.user, password=config.password, key_filename=config.key)
-            try:
-                cache['servers'][server]['info'] = get_gpu_infos(config.ssh)
-                cache['servers'][server]['time'] = datetime.now()
-            finally:
-                config.ssh.close()
-        except Exception:
-            logging.error(f'Had an issue while updating cache for {server}: {traceback.format_exc()}')
+
+    server, result = get_new_server_info(server)
+    if result:
+        cache['servers'][server].update(result)
+
+    logging.info('restarting timer to update chache')
+    threading.Timer(interval.total_seconds(), update_cache, (server, interval, )).start()
+
+def write_cache(interval):
     with open(config.cache_file, 'wb') as f:
         pickle.dump(cache, f)
-    threading.Timer(interval.total_seconds(), update_cache, (interval, )).start()
+
+    threading.Timer(interval.total_seconds(), write_cache, (interval, )).start()
 
 
 def start_async(interval):
     # asyncronously updates cache
-    threading.Thread(target=update_cache, args=(interval, )).start()
+    for server in config.servers:
+        threading.Thread(target=update_cache, args=(server, interval, )).start()
+
+    threading.Thread(target=write_cache, args=(interval, )).start()
 
 
 def setup():

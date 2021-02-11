@@ -1,5 +1,10 @@
-{% for server, info in infos.items() %}
+{% for server, server_info in infos.items() %}
+{% if server_info.time.timestamp() > 0 and (show_all or server_info.info|selectattr('free')|first) %}
     <h2>{{ server }}</h2>
+    <div>Last Updated: {{ server_info.time.strftime('%d.%m.%Y %H:%M') }}</div>
+    {% if server_info.smi_error %}
+    <div>Cannot update entries because of an NVML issue.</div>
+    {% else %}
     <div>
         <div class='divTable'>
             <div class='divTableRow'>
@@ -13,7 +18,7 @@
                 <div class='divTableCell'>User</div>
                 {% endif %}
             </div>
-            {% for gpu in info %}
+            {% for gpu in server_info.info %}
             {% if gpu.free or show_all %}
             <div class='divTableRow'>
                 <div class='divTableCell'>{{ gpu.idx }}</div>
@@ -30,4 +35,6 @@
             {% endfor %}
         </div>
     </div>
+    {% endif %}
+{% endif %}
 {% endfor %}

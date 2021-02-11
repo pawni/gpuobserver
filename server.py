@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from flask.logging import default_handler
 import requests
 import logging
 import time
@@ -7,10 +8,19 @@ import config
 import gpu_helper
 from statistics import get_stats_df, get_time_str
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
+
+formatter = logging.Formatter(
+    fmt='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
 
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
+default_handler.setFormatter(formatter)
 
 
 @app.route('/')

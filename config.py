@@ -1,13 +1,7 @@
-import paramiko
 import os
 from datetime import datetime, timedelta
 import re
 import getpass
-
-ssh = paramiko.SSHClient()
-
-# be careful to change this if you don't trust to add the hostkeys automatically
-ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 # read ssh credentials from environment
 key = os.environ.get('GPUMONITOR_KEY', None)
