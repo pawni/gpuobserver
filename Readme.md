@@ -42,4 +42,4 @@ pandas
 ```
 
 ## Acknowledgements
-This uses some adapted templates from html5up.
+This uses some adapted templates from [html5up](https://html5up.net).
